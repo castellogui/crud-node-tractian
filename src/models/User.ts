@@ -16,6 +16,7 @@ const UserSchema = new Schema({
   },
   email: {
     type: String,
+    required: true,
     unique: true,
   },
   password: {
@@ -27,9 +28,13 @@ const UserSchema = new Schema({
   },
   created_at: {
     type: Date,
+    required: true,
     default: Date.now,
   },
-  company: {
+  lastLoging: {
+    type: Date,
+  },
+  companyId: {
     type: String,
     required: true,
   },
