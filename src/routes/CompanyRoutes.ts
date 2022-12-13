@@ -5,12 +5,14 @@ import {
   createCompany,
   editCompany,
   deleteCompany,
+  moveUserFromCompany as moveUserFromCompany,
 } from "../services/CompanyService";
 const router = require("express").Router();
 
 router.get("/find", validateRequest, findAllCompanies);
 router.get("/find/:id", validateRequest, findCompany);
 router.post("/new", validateRequest, createCompany);
+router.post("/moveUser/:id", validateRequest, moveUserFromCompany);
 router.put("/edit/:id", validateRequest, editCompany);
 router.delete("/delete/:id", validateRequest, deleteCompany);
 

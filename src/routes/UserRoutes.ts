@@ -1,5 +1,11 @@
 import { validateRequest } from "../middleware/auth";
-import { findAllUsers, createUser, editUser, deleteUser, findUser } from "../services/UserService";
+import {
+  findAllUsers,
+  findUser,
+  createUser,
+  editUser,
+  deleteUser,
+} from "../controllers/UserController";
 const router = require("express").Router();
 
 router.get("/find", validateRequest, findAllUsers);
