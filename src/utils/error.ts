@@ -1,15 +1,20 @@
 import { Response } from "express";
 
-export function handleError(error: Error | unknown, res: Response) {
+export default function handleRequestError(
+  error: Error | unknown,
+  res: Response,
+  method: String,
+  model: String
+) {
   if (error instanceof Error) {
     res.status(500).send({
-      message: "Some error has occurred while trying to create a new user.",
+      message: `Some error has occurred while trying to ${method} a ${model}.`,
       errorDetail: error.message,
     });
     return;
   } else {
     res.status(500).send({
-      message: "Some unknown error has occurred while trying to create a new user.",
+      message: `Some unknown error has occurred while trying to ${method} a ${model}.`,
       errorDetail: error,
     });
     return;

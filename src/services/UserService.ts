@@ -2,14 +2,14 @@ import { Request, Response } from "express";
 import User from "../models/User";
 import { user } from "../interfaces/user.interface";
 import { handleEntityNotFoundOrNotModified } from "../utils/entity";
-import { handleError } from "../utils/error";
+import handleRequestError from "../utils/error";
 
 export const findAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find().populate("company");
     res.status(200).send({ users });
   } catch (error) {
-    handleError(error, res);
+    handleRequestError(error, res, "find", "users");
   }
 };
 
@@ -19,7 +19,7 @@ export const findUser = async (req: Request, res: Response) => {
     const user = await User.findOne({ _id: id }).populate("company");
     res.status(200).send({ user });
   } catch (error) {
-    handleError(error, res);
+    handleRequestError(error, res, "find", "user");
   }
 };
 
@@ -46,7 +46,7 @@ export const createUser = async (req: Request, res: Response) => {
     await User.create(newUser);
     res.status(201).send({ message: "User created.", newUser });
   } catch (error) {
-    handleError(error, res);
+    handleRequestError(error, res, "create", "a new user");
   }
 };
 
@@ -70,7 +70,7 @@ export const editUser = async (req: Request, res: Response) => {
     if (handleEntityNotFoundOrNotModified(updatedUser, res)) return;
     res.status(200).send({ message: "User updated.", userInfo });
   } catch (error) {
-    handleError(error, res);
+    handleRequestError(error, res, "edit", "user");
   }
 };
 
@@ -82,7 +82,7 @@ export const deleteUser = async (req: Request, res: Response) => {
     await User.findByIdAndDelete({ _id: id });
     res.status(200).send({ message: "User deleted." });
   } catch (error) {
-    handleError(error, res);
+    handleRequestError(error, res, "delete", "user");
   }
 };
 
