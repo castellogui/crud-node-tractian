@@ -1,13 +1,11 @@
 import { Response } from "express";
 
-export function handleEntityNotFoundOrNotModified(model: any, res: Response) {
+export function checkEntityNotFoundOrNotModified(model: any, res: Response) {
   if (model.matchedCount === 0) {
-    res.status(200).send({ message: "Entity not found." });
-    return true;
+    throw Error("Entity not found.");
   }
 
   if (model.modifiedCount === 0) {
-    res.status(200).send({ message: "Nothing changed in user record." });
-    return true;
+    throw Error("Nothing changed in record.");
   }
 }
