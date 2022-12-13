@@ -31,8 +31,9 @@ const UserSchema = new Schema({
     required: true,
     default: Date.now,
   },
-  lastLoging: {
+  lastLogin: {
     type: Date,
+    required: true,
   },
   companyId: {
     type: String,
