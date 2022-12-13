@@ -3,46 +3,47 @@ import mongoose, { Schema, SchemaTypes } from "mongoose";
 const UserSchema = new Schema({
   name: {
     type: SchemaTypes.String,
-    required: true,
+    required: [true, "name is required"],
   },
   familyName: {
     type: String,
-    required: true,
+    required: [true, "familyName is required"],
   },
   username: {
     type: String,
-    required: true,
+    required: [true, "username is required"],
     unique: true,
   },
   email: {
     type: String,
-    required: true,
+    required: [true, "email is required"],
     unique: true,
   },
   password: {
     type: String,
-    required: true,
+    required: [true, "password is required"],
   },
   avatar: {
     type: String,
   },
   created_at: {
     type: Date,
-    required: true,
+    required: [true, "created_at is required"],
     default: Date.now,
   },
   lastLogin: {
     type: Date,
-    required: true,
+    required: [true, "lastLogin is required"],
   },
   company: {
     type: mongoose.Types.ObjectId,
     ref: "Company",
-    required: true,
+    required: [true, "company is required"],
   },
   type: {
-    type: String,
-    required: true,
+    type: [String],
+    enum: ["ROLE_ADMIN", "ROLE_USER"],
+    required: [true, "type is required"],
   },
 });
 
