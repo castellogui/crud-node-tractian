@@ -46,9 +46,9 @@ export const createUser = async (req: Request, res: Response) => {
       companyId: req.body.companyId,
     };
 
-    checkIrregularitiesInUserObject(res, newUser);
+    if (checkIrregularitiesInUserObject(res, newUser)) return;
     await User.create(newUser);
-    res.status(201).send({ message: "User created", newUser });
+    res.status(201).send({ message: "User created.", newUser });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -74,9 +74,10 @@ export const editUser = async (req: Request, res: Response) => {
       companyId: req.body.companyId,
     };
 
-    checkIrregularitiesInUserObject(res, userInfo);
+    if (checkIrregularitiesInUserObject(res, userInfo)) return;
     const updatedUser = await User.updateOne({ _id: id }, userInfo);
-    res.status(200).send({ message: "User created", updatedUser });
+    if (handleUserNotFoundOrNotModified(updatedUser, res)) return;
+    res.status(200).send({ message: "User updated.", updatedUser });
   } catch (error) {
     res.status(500).send({
       message: "Some error has occurred while trying to edit an user.",
@@ -88,7 +89,8 @@ export const editUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
-    await User.findByIdAndDelete({ _id: id });
+    const userDeleted = await User.findByIdAndDelete({ _id: id });
+    res.status(200).send({ message: "User deleted." });
   } catch (error) {
     res.status(500).send({
       message: "Some error has occurred while trying to delete an user.",
@@ -101,7 +103,7 @@ function checkIrregularitiesInUserObject(res: Response, newUser: user) {
   for (const atr in newUser) {
     if (newUser[atr as keyof typeof newUser] == "" && !(atr == "avatar" || atr == "lastLogin")) {
       res.status(422).send({ message: `Field '${atr}' must not be empty.` });
-      return;
+      return true;
     }
 
     if (
@@ -109,12 +111,23 @@ function checkIrregularitiesInUserObject(res: Response, newUser: user) {
       !(atr == "created_at" || atr == "lastLogin")
     ) {
       res.status(422).send({ message: `Field '${atr}' must be a string.` });
-      return;
+      return true;
     }
   }
 
   if (typeof newUser.created_at != "number" || typeof newUser.lastLogin != "number") {
     res.status(422).send({ message: "Field created_at or lastLogin must be a Date type." });
-    return;
+    return true;
+  }
+}
+
+function handleUserNotFoundOrNotModified(model: any, res: Response) {
+  if (model.matchedCount === 0) {
+    res.status(200).send({ message: "User not found." });
+    return true;
+  }
+
+  if (model.modifiedCount === 0) {
+    res.status(200).send({ message: "Nothing changed in user record." });
   }
 }
