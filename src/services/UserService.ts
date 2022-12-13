@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User";
 import { user } from "../interfaces/user.interface";
+import { handleEntityNotFoundOrNotModified } from "../utils/entity";
 
 export const findAllUsers = async (req: Request, res: Response) => {
   try {
@@ -76,7 +77,7 @@ export const editUser = async (req: Request, res: Response) => {
 
     if (checkIrregularitiesInUserObject(res, userInfo)) return;
     const updatedUser = await User.updateOne({ _id: id }, userInfo);
-    if (handleUserNotFoundOrNotModified(updatedUser, res)) return;
+    if (handleEntityNotFoundOrNotModified(updatedUser, res)) return;
     res.status(200).send({ message: "User updated.", updatedUser });
   } catch (error) {
     res.status(500).send({
@@ -89,7 +90,7 @@ export const editUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
-    const userDeleted = await User.findByIdAndDelete({ _id: id });
+    await User.findByIdAndDelete({ _id: id });
     res.status(200).send({ message: "User deleted." });
   } catch (error) {
     res.status(500).send({
@@ -106,10 +107,7 @@ function checkIrregularitiesInUserObject(res: Response, newUser: user) {
       return true;
     }
 
-    if (
-      typeof newUser[atr as keyof typeof newUser] != "string" &&
-      !(atr == "created_at" || atr == "lastLogin")
-    ) {
+    if (typeof newUser[atr as keyof typeof newUser] != "string" && !(atr == "created_at")) {
       res.status(422).send({ message: `Field '${atr}' must be a string.` });
       return true;
     }
@@ -118,16 +116,5 @@ function checkIrregularitiesInUserObject(res: Response, newUser: user) {
   if (typeof newUser.created_at != "number" || typeof newUser.lastLogin != "number") {
     res.status(422).send({ message: "Field created_at or lastLogin must be a Date type." });
     return true;
-  }
-}
-
-function handleUserNotFoundOrNotModified(model: any, res: Response) {
-  if (model.matchedCount === 0) {
-    res.status(200).send({ message: "User not found." });
-    return true;
-  }
-
-  if (model.modifiedCount === 0) {
-    res.status(200).send({ message: "Nothing changed in user record." });
   }
 }
