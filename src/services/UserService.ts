@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import User from "../models/User";
 import { user } from "../interfaces/user.interface";
 import { handleEntityNotFoundOrNotModified } from "../utils/entity";
+import { handleError } from "../utils/error";
 
 export const findAllUsers = async (req: Request, res: Response) => {
   try {
@@ -84,22 +85,6 @@ export const deleteUser = async (req: Request, res: Response) => {
     handleError(error, res);
   }
 };
-
-function handleError(error: Error | unknown, res: Response) {
-  if (error instanceof Error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to create a new user.",
-      errorDetail: error.message,
-    });
-    return;
-  } else {
-    res.status(500).send({
-      message: "Some unknown error has occurred while trying to create a new user.",
-      errorDetail: error,
-    });
-    return;
-  }
-}
 
 function checkUserRequester(id: String, requesterId: String) {
   if (id === requesterId) {
