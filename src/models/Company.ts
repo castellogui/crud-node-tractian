@@ -3,22 +3,22 @@ import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
 const CompanySchema = new Schema({
   name: {
     type: SchemaTypes.String,
-    required: true,
+    required: [true, "name is required"],
   },
   units: {
     type: SchemaTypes.Array,
-    required: true,
+    required: [true, "units is required"],
     default: [],
   },
   users: {
     type: [Types.ObjectId],
     ref: "User",
-    required: true,
+    required: [true, "users is required"],
     default: [],
   },
   created_at: {
     type: Date,
-    required: true,
+    required: [true, "created_at is required"],
     default: Date.now(),
   },
 });
