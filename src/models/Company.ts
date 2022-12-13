@@ -1,4 +1,4 @@
-import mongoose, { Schema, SchemaTypes } from "mongoose";
+import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
 
 const CompanySchema = new Schema({
   name: {
@@ -8,14 +8,18 @@ const CompanySchema = new Schema({
   units: {
     type: SchemaTypes.Array,
     required: true,
+    default: [],
   },
   users: {
-    type: SchemaTypes.Array,
+    type: [Types.ObjectId],
+    ref: "User",
     required: true,
+    default: [],
   },
   created_at: {
     type: Date,
     required: true,
+    default: Date.now(),
   },
 });
 
