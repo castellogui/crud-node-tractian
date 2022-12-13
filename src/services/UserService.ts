@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User";
 import { user } from "../interfaces/user.interface";
-import { handleEntityNotFoundOrNotModified } from "../utils/entity";
+import { checkEntityNotFoundOrNotModified } from "../utils/entity";
 import handleRequestError from "../utils/error";
 
 export const findAllUsers = async (req: Request, res: Response) => {
@@ -67,7 +67,7 @@ export const editUser = async (req: Request, res: Response) => {
     };
 
     const updatedUser = await User.updateOne({ _id: id }, userInfo);
-    if (handleEntityNotFoundOrNotModified(updatedUser, res)) return;
+    checkEntityNotFoundOrNotModified(updatedUser, res);
     res.status(200).send({ message: "User updated.", userInfo });
   } catch (error) {
     handleRequestError(error, res, "edit", "user");
