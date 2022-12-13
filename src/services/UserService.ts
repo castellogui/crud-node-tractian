@@ -7,7 +7,23 @@ export const findAllUsers = async (req: Request, res: Response) => {
     const users = await User.find();
     res.status(200).send({ users });
   } catch (error) {
-    res.status(500).send({ error });
+    res.status(500).send({
+      message: "Some error has occurred while trying to find all users.",
+      errorDetail: error,
+    });
+  }
+};
+
+export const findUser = async (req: Request, res: Response) => {
+  try {
+    let id = req.params.id;
+    const user = await User.findOne({ _id: id });
+    res.status(200).send({ user });
+  } catch (error) {
+    res.status(500).send({
+      message: "Some error has occurred while trying to create a new user.",
+      errorDetail: error,
+    });
   }
 };
 
@@ -64,6 +80,18 @@ export const editUser = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).send({
       message: "Some error has occurred while trying to edit an user.",
+      errorDetail: error,
+    });
+  }
+};
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    let id = req.params.id;
+    await User.findByIdAndDelete({ _id: id });
+  } catch (error) {
+    res.status(500).send({
+      message: "Some error has occurred while trying to delete an user.",
       errorDetail: error,
     });
   }
