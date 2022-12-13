@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 export interface user {
   name: String;
   familyName: String;
@@ -7,5 +9,6 @@ export interface user {
   avatar: String;
   created_at: Date;
   lastLogin: Date;
-  companyId: String;
+  company: mongoose.Types.ObjectId;
+  type: String;
 }

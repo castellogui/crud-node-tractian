@@ -35,7 +35,12 @@ const UserSchema = new Schema({
     type: Date,
     required: true,
   },
-  companyId: {
+  company: {
+    type: mongoose.Types.ObjectId,
+    ref: "Company",
+    required: true,
+  },
+  type: {
     type: String,
     required: true,
   },
