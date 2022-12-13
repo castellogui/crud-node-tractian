@@ -1,30 +1,25 @@
 import { Request, Response } from "express";
 import { company } from "../interfaces/company.interface";
 import Company from "../models/Company";
-import { handleEntityNotFoundOrNotModified } from "../utils/entity";
+import { checkEntityNotFoundOrNotModified } from "../utils/entity";
+import handleRequestError from "../utils/error";
 
 export const findAllCompanies = async (req: Request, res: Response) => {
   try {
-    const companies = await Company.find();
+    const companies = await Company.find().populate("users");
     res.status(200).send({ companies });
   } catch (error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to find all companies.",
-      errorDetail: error,
-    });
+    handleRequestError(error, res, "find", "companies");
   }
 };
 
 export const findCompany = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
-    const company = await Company.findOne({ _id: id });
+    const company = await Company.findOne({ _id: id }).populate("users");
     res.status(200).send({ company });
   } catch (error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to create a new company.",
-      errorDetail: error,
-    });
+    handleRequestError(error, res, "find", "company");
   }
 };
 
@@ -42,68 +37,43 @@ export const createCompany = async (req: Request, res: Response) => {
       created_at: req.body.created_at,
     };
 
-    if (checkIrregularitiesInCompanyObject(res, newCompany)) return;
     await Company.create(newCompany);
     res.status(201).send({ message: "Company created", newCompany });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      message: "Some error has occurred while trying to create a new company.",
-      errorDetail: error,
-    });
+    handleRequestError(error, res, "create", "company");
   }
 };
 
 export const editCompany = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
-    const companyInfo: company = {
+    const companyEditableInfo = {
       name: req.body.name,
-      units: req.body.units,
-      users: req.body.users,
-      created_at: req.body.created_at,
     };
 
-    if (checkIrregularitiesInCompanyObject(res, companyInfo)) return;
-    const updatedCompany = await Company.updateOne({ _id: id }, companyInfo);
-    if (handleEntityNotFoundOrNotModified(updatedCompany, res)) return;
+    const updatedCompany = await Company.updateOne({ _id: id }, companyEditableInfo);
+    checkEntityNotFoundOrNotModified(updatedCompany, res);
     res.status(200).send({ message: "Company updated", updatedCompany });
   } catch (error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to edit an company.",
-      errorDetail: error,
-    });
+    handleRequestError(error, res, "edit", "company");
   }
 };
 
 export const deleteCompany = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
+    await checkUsersBeforeDelete(id);
     await Company.findByIdAndDelete({ _id: id });
     res.status(200).send({ message: "Company deleted." });
   } catch (error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to delete a company.",
-      errorDetail: error,
-    });
+    handleRequestError(error, res, "delete", "company");
   }
 };
 
-function checkIrregularitiesInCompanyObject(res: Response, newCompany: company) {
-  for (const atr in newCompany) {
-    if (newCompany[atr as keyof typeof newCompany] == "") {
-      res.status(422).send({ message: `Field '${atr}' must not be empty.` });
-      return true;
-    }
-
-    if (typeof newCompany[atr as keyof typeof newCompany] != "string" && !(atr == "created_at")) {
-      res.status(422).send({ message: `Field '${atr}' must be a string.` });
-      return true;
-    }
-  }
-
-  if (typeof newCompany.created_at != "number") {
-    res.status(422).send({ message: "Field created_at must be a Date type." });
-    return true;
+async function checkUsersBeforeDelete(id: String) {
+  let resultQuery = await Company.findOne({ _id: id });
+  let foundUsers = resultQuery?.users.length! > 0;
+  if (foundUsers) {
+    throw Error("The company can't be deleted because there is users registered yet.");
   }
 }
