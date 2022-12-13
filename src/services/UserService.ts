@@ -5,26 +5,20 @@ import { handleEntityNotFoundOrNotModified } from "../utils/entity";
 
 export const findAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await User.find();
+    const users = await User.find().populate("company");
     res.status(200).send({ users });
   } catch (error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to find all users.",
-      errorDetail: error,
-    });
+    handleError(error, res);
   }
 };
 
 export const findUser = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
-    const user = await User.findOne({ _id: id });
+    const user = await User.findOne({ _id: id }).populate("company");
     res.status(200).send({ user });
   } catch (error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to create a new user.",
-      errorDetail: error,
-    });
+    handleError(error, res);
   }
 };
 
@@ -44,25 +38,20 @@ export const createUser = async (req: Request, res: Response) => {
       avatar: req.body.avatar,
       created_at: req.body.created_at,
       lastLogin: req.body.lastLogin,
-      companyId: req.body.companyId,
+      company: req.body.companyId,
+      type: req.body.type,
     };
 
-    if (checkIrregularitiesInUserObject(res, newUser)) return;
     await User.create(newUser);
     res.status(201).send({ message: "User created.", newUser });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      message: "Some error has occurred while trying to create a new user.",
-      errorDetail: error,
-    });
+    handleError(error, res);
   }
 };
 
 export const editUser = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
-
     const userInfo: user = {
       name: req.body.name,
       familyName: req.body.familyName,
@@ -72,10 +61,10 @@ export const editUser = async (req: Request, res: Response) => {
       avatar: req.body.avatar,
       created_at: req.body.created_at,
       lastLogin: req.body.lastLogin,
-      companyId: req.body.companyId,
+      company: req.body.companyId,
+      type: req.body.companyId,
     };
 
-    if (checkIrregularitiesInUserObject(res, userInfo)) return;
     const updatedUser = await User.updateOne({ _id: id }, userInfo);
     if (handleEntityNotFoundOrNotModified(updatedUser, res)) return;
     res.status(200).send({ message: "User updated.", updatedUser });
@@ -100,21 +89,18 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-function checkIrregularitiesInUserObject(res: Response, newUser: user) {
-  for (const atr in newUser) {
-    if (newUser[atr as keyof typeof newUser] == "" && !(atr == "avatar" || atr == "lastLogin")) {
-      res.status(422).send({ message: `Field '${atr}' must not be empty.` });
-      return true;
-    }
-
-    if (typeof newUser[atr as keyof typeof newUser] != "string" && !(atr == "created_at")) {
-      res.status(422).send({ message: `Field '${atr}' must be a string.` });
-      return true;
-    }
-  }
-
-  if (typeof newUser.created_at != "number" || typeof newUser.lastLogin != "number") {
-    res.status(422).send({ message: "Field created_at or lastLogin must be a Date type." });
-    return true;
+function handleError(error: Error | unknown, res: Response) {
+  if (error instanceof Error) {
+    res.status(500).send({
+      message: "Some error has occurred while trying to create a new user.",
+      errorDetail: error.message,
+    });
+    return;
+  } else {
+    res.status(500).send({
+      message: "Some unknown error has occurred while trying to create a new user.",
+      errorDetail: error,
+    });
+    return;
   }
 }
