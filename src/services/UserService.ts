@@ -62,30 +62,26 @@ export const editUser = async (req: Request, res: Response) => {
       created_at: req.body.created_at,
       lastLogin: req.body.lastLogin,
       company: req.body.companyId,
-      type: req.body.companyId,
+      type: req.body.type,
     };
 
     const updatedUser = await User.updateOne({ _id: id }, userInfo);
     if (handleEntityNotFoundOrNotModified(updatedUser, res)) return;
-    res.status(200).send({ message: "User updated.", updatedUser });
+    res.status(200).send({ message: "User updated.", userInfo });
   } catch (error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to edit an user.",
-      errorDetail: error,
-    });
+    handleError(error, res);
   }
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
+    let requesterId = req.body.requesterId;
+    checkUserRequester(id, requesterId);
     await User.findByIdAndDelete({ _id: id });
     res.status(200).send({ message: "User deleted." });
   } catch (error) {
-    res.status(500).send({
-      message: "Some error has occurred while trying to delete an user.",
-      errorDetail: error,
-    });
+    handleError(error, res);
   }
 };
 
@@ -102,5 +98,11 @@ function handleError(error: Error | unknown, res: Response) {
       errorDetail: error,
     });
     return;
+  }
+}
+
+function checkUserRequester(id: String, requesterId: String) {
+  if (id === requesterId) {
+    throw Error("The user can't delete itself.");
   }
 }
