@@ -1,6 +1,6 @@
-export function checkEntityNotFoundOrNotModified(model: any) {
+export function checkEntityNotFoundOrNotModified(model: any, modelId?: String) {
   if (model === null || model.matchedCount === 0) {
-    throw Error("Entity not found.");
+    throw Error(`Entity not found. Value: ${modelId}`);
   }
 
   if (model.modifiedCount === 0) {
