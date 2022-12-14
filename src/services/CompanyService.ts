@@ -1,6 +1,7 @@
+import mongoose from "mongoose";
 import { company } from "../interfaces/company.interface";
 import { unit } from "../interfaces/unit.interface";
-import { user } from "../interfaces/user.interface";
+import { updatedUser } from "../interfaces/user.interface";
 import Company from "../models/Company";
 import UnitService from "./UnitService";
 import UserService from "./UserService";
@@ -52,7 +53,7 @@ export default {
     return updatedCompany;
   },
 
-  moveUserFromCompany: async (CurrentCompanyId: String, userId: String, newUserInfo: user) => {
+  moveUserFromCompany: async (CurrentCompanyId: String, userId: String, newCompanyId: String) => {
     const updatedCompanyRemoved = await Company.updateOne(
       { _id: CurrentCompanyId },
       {
@@ -63,7 +64,7 @@ export default {
     );
 
     const updatedCompanyAdded = await Company.updateOne(
-      { _id: newUserInfo.company },
+      { _id: newCompanyId },
       {
         $push: {
           users: [{ _id: userId }],
@@ -71,8 +72,20 @@ export default {
       }
     );
 
-    let updatedUser = UserService.editUser(userId, newUserInfo);
+    let updatedUserCompany: updatedUser = { company: newCompanyId };
+    let updatedUser = UserService.editUser(userId, updatedUserCompany);
     return [updatedCompanyRemoved, updatedCompanyAdded, updatedUser];
+  },
+
+  removeUserFromCompany: async (userId: String, companyId: String) => {
+    const updatedCompany = await Company.updateOne(
+      { _id: companyId },
+      {
+        $pullAll: {
+          users: [{ _id: userId }],
+        },
+      }
+    );
   },
 
   addUnitInCompany: async (companyId: String, unitId: String) => {
