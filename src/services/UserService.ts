@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { updatedUser, user } from "../interfaces/user.interface";
 import User from "../models/User";
 export default {
@@ -6,7 +7,7 @@ export default {
     return users;
   },
 
-  findUser: async (id: String) => {
+  findUser: async (id: String | Types.ObjectId | undefined) => {
     const user = await User.findOne({ _id: id }).populate("company");
     return user;
   },
