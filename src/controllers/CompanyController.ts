@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { company } from "../interfaces/company.interface";
 import CompanyService from "../services/CompanyService";
+import UnitService from "../services/UnitService";
 import UserService from "../services/UserService";
 import { checkEntityNotFoundOrNotModified } from "../utils/entity";
 import handleRequestError from "../utils/error";
@@ -97,7 +98,7 @@ export const moveUnitFromCompany = async (req: Request, res: Response) => {
     let currentCompanyId = req.params.id;
     let unitId = req.body.unitId;
     let newCompanyId = req.body.newCompanyId;
-    checkEntityNotFoundOrNotModified(await UserService.findUser(unitId));
+    checkEntityNotFoundOrNotModified(await UnitService.findUnit(unitId), unitId);
     checkEntityNotFoundOrNotModified(await CompanyService.findCompany(currentCompanyId));
     checkEntityNotFoundOrNotModified(await CompanyService.findCompany(newCompanyId));
     await checkUnitInCompanyBeforeAdd(newCompanyId, unitId);
