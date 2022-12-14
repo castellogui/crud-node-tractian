@@ -4,6 +4,7 @@ import UnitService from "../services/UnitService";
 import { checkEntityNotFoundOrNotModified } from "../utils/entity";
 import handleRequestError from "../utils/error";
 import AssetService from "../services/AssetService";
+import UserService from "../services/UserService";
 
 export const findAllAssets = async (req: Request, res: Response) => {
   try {
@@ -68,6 +69,7 @@ export const editAsset = async (req: Request, res: Response) => {
     };
 
     checkEntityNotFoundOrNotModified(await UnitService.findUnit(assetInfo.unit));
+    checkEntityNotFoundOrNotModified(await UserService.findUser(assetInfo.owner));
     let updatedAsset = await AssetService.editAsset(id, assetInfo);
     checkEntityNotFoundOrNotModified(updatedAsset);
     res.status(200).send({ message: "Asset updated.", updatedAsset });
@@ -79,7 +81,7 @@ export const editAsset = async (req: Request, res: Response) => {
 export const deleteAsset = async (req: Request, res: Response) => {
   try {
     let assetId = req.params.id;
-    let unitId = req.body.companyId;
+    let unitId = req.body.unitId;
     await AssetService.deleteAsset(assetId);
     checkEntityNotFoundOrNotModified(await UnitService.findUnit(unitId));
     await UnitService.removeAssetFromUnit(assetId, unitId);
