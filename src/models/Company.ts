@@ -6,7 +6,7 @@ const CompanySchema = new Schema({
     required: [true, "name is required"],
   },
   units: {
-    type: SchemaTypes.Array,
+    type: [Types.ObjectId],
     ref: "Unit",
     required: [true, "units is required"],
     default: [],
