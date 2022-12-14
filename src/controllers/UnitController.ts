@@ -4,6 +4,7 @@ import UnitService from "../services/UnitService";
 import { unit, updatedUnit } from "../interfaces/unit.interface";
 import { checkEntityNotFoundOrNotModified } from "../utils/entity";
 import CompanyService from "../services/CompanyService";
+import AssetService from "../services/AssetService";
 const bcrypt = require("bcrypt");
 
 export const findAllUnits = async (req: Request, res: Response) => {
@@ -61,7 +62,6 @@ export const editUnit = async (req: Request, res: Response) => {
     };
 
     checkEntityNotFoundOrNotModified(await CompanyService.findCompany(unitInfo.company));
-    //TODO check entity in assets
     let updatedUnit = await UnitService.editUnit(id, unitInfo);
     checkEntityNotFoundOrNotModified(updatedUnit);
     res.status(200).send({ message: "Unit updated.", updatedUnit });
@@ -74,6 +74,7 @@ export const deleteUnit = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
     let companyId = req.body.companyId;
+    await checkAssetsBeforeDelete(id);
     await UnitService.deleteUnit(id);
     checkEntityNotFoundOrNotModified(await CompanyService.findCompany(companyId));
     await CompanyService.removeUnitFromCompany(id, companyId);
@@ -82,3 +83,45 @@ export const deleteUnit = async (req: Request, res: Response) => {
     handleRequestError(error, res, "delete", "unit");
   }
 };
+
+async function checkAssetsBeforeDelete(id: String) {
+  let resultQuery = await UnitService.findUnit(id);
+  let foundAssets = resultQuery?.assets.length! > 0;
+  if (foundAssets) {
+    throw Error("The unit can't be deleted because there is units registered yet.");
+  }
+}
+
+export const moveAssetFromUnit = async (req: Request, res: Response) => {
+  try {
+    let currentUnitId = req.params.id;
+    let assetId = req.body.assetId;
+    let newUnitId = req.body.newUnitId;
+    checkEntityNotFoundOrNotModified(await AssetService.findAsset(assetId), assetId);
+    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(currentUnitId));
+    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(newUnitId));
+    await checkAssetInUnitBeforeAdd(newUnitId, assetId);
+    let [updatedUnitRemoved, updatedUnitAdded] = await UnitService.moveAssetFromUnit(
+      currentUnitId,
+      assetId,
+      newUnitId
+    );
+    res.status(200).send({
+      message: "Asset transferred from unit.",
+      updatedUnitRemoved,
+      updatedUnitAdded,
+    });
+  } catch (error) {
+    handleRequestError(error, res, "delete", "asset from unity");
+  }
+};
+
+async function checkAssetInUnitBeforeAdd(newUnitId: String, assetId: String) {
+  let assetFounded = [];
+  let response = await UnitService.findUnitByUnitAndAsset(newUnitId, assetId);
+  response != null ? assetFounded.push(response) : null;
+  const isAssetInUnit = assetFounded.length;
+  if (isAssetInUnit > 0) {
+    throw Error("Unit is already added in company.");
+  }
+}
