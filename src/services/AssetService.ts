@@ -3,12 +3,12 @@ import { asset, updatedAsset } from "../interfaces/asset.interface";
 import Asset from "../models/Asset";
 export default {
   findAllAssets: async () => {
-    const assets = await Asset.find().populate("company");
+    const assets = await Asset.find().populate("owner").populate("unit");
     return assets;
   },
 
   findAsset: async (id: String | Types.ObjectId) => {
-    const asset = await Asset.findOne({ _id: id }).populate("company");
+    const asset = await Asset.findOne({ _id: id }).populate("owner").populate("unit");
     return asset;
   },
 
