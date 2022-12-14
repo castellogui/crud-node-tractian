@@ -7,6 +7,7 @@ const AssetSchema = new Schema({
   },
   unit: {
     type: SchemaTypes.ObjectId,
+    ref: "Unit",
     required: [true, "unit is required"],
   },
   description: {
@@ -23,6 +24,7 @@ const AssetSchema = new Schema({
   },
   owner: {
     type: SchemaTypes.ObjectId,
+    ref: "User",
     required: [true, "owner is required"],
   },
   status: {
