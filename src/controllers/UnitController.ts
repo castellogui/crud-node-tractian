@@ -98,8 +98,8 @@ export const moveAssetFromUnit = async (req: Request, res: Response) => {
     let assetId = req.body.assetId;
     let newUnitId = req.body.newUnitId;
     checkEntityNotFoundOrNotModified(await AssetService.findAsset(assetId), assetId);
-    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(currentUnitId));
-    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(newUnitId));
+    checkEntityNotFoundOrNotModified(await UnitService.findUnit(currentUnitId));
+    checkEntityNotFoundOrNotModified(await UnitService.findUnit(newUnitId));
     await checkAssetInUnitBeforeAdd(newUnitId, assetId);
     let [updatedUnitRemoved, updatedUnitAdded] = await UnitService.moveAssetFromUnit(
       currentUnitId,
