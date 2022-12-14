@@ -1,6 +1,5 @@
 import { user } from "../interfaces/user.interface";
 import User from "../models/User";
-import { checkEntityNotFoundOrNotModified } from "../utils/entity";
 export default {
   findAllUsers: async () => {
     const users = await User.find().populate("company");
@@ -19,7 +18,7 @@ export default {
 
   editUser: async (id: String, userInfo: user) => {
     const updatedUser = await User.updateOne({ _id: id }, userInfo);
-    checkEntityNotFoundOrNotModified(updatedUser);
+    return updatedUser;
   },
 
   deleteUser: async (id: String, requesterId: String) => {

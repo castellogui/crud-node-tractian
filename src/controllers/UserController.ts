@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import handleRequestError from "../utils/error";
 import UserService from "../services/UserService";
 import { user } from "../interfaces/user.interface";
+import { checkEntityNotFoundOrNotModified } from "../utils/entity";
+import CompanyService from "../services/CompanyService";
 const bcrypt = require("bcrypt");
 
 export const findAllUsers = async (req: Request, res: Response) => {
@@ -44,6 +46,7 @@ export const createUser = async (req: Request, res: Response) => {
     };
 
     let newUser = await UserService.createUser(newUserInfo);
+    await CompanyService.addUserInCompany(newUserInfo.company.toString(), newUser._id.toString());
     res.status(201).send({ message: "User created.", newUser });
   } catch (error) {
     handleRequestError(error, res, "create", "a new user");
@@ -67,6 +70,7 @@ export const editUser = async (req: Request, res: Response) => {
     };
 
     let updatedUser = await UserService.editUser(id, userInfo);
+    checkEntityNotFoundOrNotModified(updatedUser);
     res.status(200).send({ message: "User updated.", updatedUser });
   } catch (error) {
     handleRequestError(error, res, "edit", "user");
