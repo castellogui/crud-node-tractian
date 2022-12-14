@@ -1,4 +1,4 @@
-import { unit } from "../interfaces/unit.interface";
+import { unit, updatedUnit } from "../interfaces/unit.interface";
 import Unit from "../models/Unit";
 export default {
   findAllUnits: async () => {
@@ -16,12 +16,12 @@ export default {
     return newUnit;
   },
 
-  editUnit: async (id: String, unitInfo: unit) => {
+  editUnit: async (id: String, unitInfo: updatedUnit) => {
     const updatedUnit = await Unit.updateOne({ _id: id }, unitInfo);
     return updatedUnit;
   },
 
-  deleteUnit: async (id: String, requesterId: String) => {
+  deleteUnit: async (id: String) => {
     let foundedUnit = await Unit.findByIdAndDelete({ _id: id });
     await checkFoundedUnitToDelete(foundedUnit);
   },
