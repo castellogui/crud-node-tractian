@@ -1,4 +1,4 @@
-import { user } from "../interfaces/user.interface";
+import { updatedUser, user } from "../interfaces/user.interface";
 import User from "../models/User";
 export default {
   findAllUsers: async () => {
@@ -16,7 +16,7 @@ export default {
     return newUser;
   },
 
-  editUser: async (id: String, userInfo: user) => {
+  editUser: async (id: String, userInfo: updatedUser) => {
     const updatedUser = await User.updateOne({ _id: id }, userInfo);
     return updatedUser;
   },
