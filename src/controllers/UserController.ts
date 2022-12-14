@@ -45,8 +45,9 @@ export const createUser = async (req: Request, res: Response) => {
       type: req.body.type,
     };
 
+    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(newUserInfo.company));
     let newUser = await UserService.createUser(newUserInfo);
-    await CompanyService.addUserInCompany(newUserInfo.company.toString(), newUser._id.toString());
+    await CompanyService.addUserInCompany(newUserInfo.company, newUser._id);
     res.status(201).send({ message: "User created.", newUser });
   } catch (error) {
     handleRequestError(error, res, "create", "a new user");
@@ -69,6 +70,7 @@ export const editUser = async (req: Request, res: Response) => {
       type: req.body.type,
     };
 
+    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(userInfo.company));
     let updatedUser = await UserService.editUser(id, userInfo);
     checkEntityNotFoundOrNotModified(updatedUser);
     res.status(200).send({ message: "User updated.", updatedUser });
