@@ -1,5 +1,5 @@
 export function checkEntityNotFoundOrNotModified(model: any) {
-  if (model.matchedCount === 0) {
+  if (model === null || model.matchedCount === 0) {
     throw Error("Entity not found.");
   }
 
