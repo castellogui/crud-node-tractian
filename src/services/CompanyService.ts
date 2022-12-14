@@ -1,79 +1,70 @@
-import { Request, Response } from "express";
 import { company } from "../interfaces/company.interface";
+import { user } from "../interfaces/user.interface";
 import Company from "../models/Company";
-import { checkEntityNotFoundOrNotModified } from "../utils/entity";
-import handleRequestError from "../utils/error";
+import UserService from "./UserService";
 
-export const findAllCompanies = async (req: Request, res: Response) => {
-  try {
+export default {
+  findAllCompanies: async () => {
     const companies = await Company.find().populate("users");
-    res.status(200).send({ companies });
-  } catch (error) {
-    handleRequestError(error, res, "find", "companies");
-  }
-};
+    return companies;
+  },
 
-export const findCompany = async (req: Request, res: Response) => {
-  try {
-    let id = req.params.id;
+  findCompany: async (id: String) => {
     const company = await Company.findOne({ _id: id }).populate("users");
-    res.status(200).send({ company });
-  } catch (error) {
-    handleRequestError(error, res, "find", "company");
-  }
-};
+    return company;
+  },
 
-export const createCompany = async (req: Request, res: Response) => {
-  try {
-    if (!req.body) {
-      res.status(422).send({ message: "Body request empty." });
-      return;
-    }
+  createCompany: async (newCompanyInfo: company) => {
+    let newCompany = await Company.create(newCompanyInfo);
+    return newCompany;
+  },
 
-    const newCompany: company = {
-      name: req.body.name,
-      units: req.body.units,
-      users: req.body.users,
-      created_at: req.body.created_at,
-    };
-
-    await Company.create(newCompany);
-    res.status(201).send({ message: "Company created", newCompany });
-  } catch (error) {
-    handleRequestError(error, res, "create", "company");
-  }
-};
-
-export const editCompany = async (req: Request, res: Response) => {
-  try {
-    let id = req.params.id;
-    const companyEditableInfo = {
-      name: req.body.name,
-    };
-
+  editCompany: async (id: String, companyEditableInfo: any) => {
     const updatedCompany = await Company.updateOne({ _id: id }, companyEditableInfo);
-    checkEntityNotFoundOrNotModified(updatedCompany, res);
-    res.status(200).send({ message: "Company updated", updatedCompany });
-  } catch (error) {
-    handleRequestError(error, res, "edit", "company");
-  }
-};
+    return updatedCompany;
+  },
 
-export const deleteCompany = async (req: Request, res: Response) => {
-  try {
-    let id = req.params.id;
-    await checkUsersBeforeDelete(id);
+  deleteCompany: async (id: String) => {
     await Company.findByIdAndDelete({ _id: id });
-    res.status(200).send({ message: "Company deleted." });
-  } catch (error) {
-    handleRequestError(error, res, "delete", "company");
-  }
-};
+  },
 
-async function checkUsersBeforeDelete(id: String) {
-  let resultQuery = await Company.findOne({ _id: id });
-  let foundUsers = resultQuery?.users.length! > 0;
-  if (foundUsers) {
-    throw Error("The company can't be deleted because there is users registered yet.");
-  }
-}
+  findCompanyByCompanyAndUser: async (companyId: String, userId: String) => {
+    let company = await Company.findOne({ _id: companyId, users: [{ _id: userId }] });
+    return company != null ? company : null;
+  },
+
+  addUserInCompany: async (companyId: String, userId: String) => {
+    const updatedCompany = await Company.updateOne(
+      { _id: companyId },
+      {
+        $push: {
+          users: [{ _id: userId }],
+        },
+      }
+    );
+    return updatedCompany;
+  },
+
+  moveUserFromCompany: async (CurrentCompanyId: String, userId: String, newUserInfo: user) => {
+    const updatedCompanyRemoved = await Company.updateOne(
+      { _id: CurrentCompanyId },
+      {
+        $pullAll: {
+          users: [{ _id: userId }],
+        },
+      }
+    );
+
+    const updatedCompanyAdded = await Company.updateOne(
+      { _id: newUserInfo.company },
+      {
+        $push: {
+          users: [{ _id: userId }],
+        },
+      }
+    );
+
+    let updatedUser = UserService.editUser(userId, newUserInfo);
+    return [updatedCompanyRemoved, updatedCompanyAdded, updatedUser];
+  },
+};
