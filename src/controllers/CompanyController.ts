@@ -72,12 +72,12 @@ export const deleteCompany = async (req: Request, res: Response) => {
 
 export const moveUserFromCompany = async (req: Request, res: Response) => {
   try {
-    let id = req.params.id;
+    let currentCompanyId = req.params.id;
     let userId = req.body.userId;
-    let newUserInfo = req.body.userInfo;
-    await checkUserInCompanyBeforeAdd(newUserInfo.company, userId);
+    let newCompanyId = req.body.newCompanyId;
+    await checkUserInCompanyBeforeAdd(newCompanyId, userId);
     let [updatedCompanyRemoved, updatedCompanyAdded, updatedUser] =
-      await CompanyService.moveUserFromCompany(id, userId, newUserInfo);
+      await CompanyService.moveUserFromCompany(currentCompanyId, userId, newCompanyId);
     checkEntityNotFoundOrNotModified(await updatedUser);
     res.status(200).send({
       message: "User transferred from company.",
