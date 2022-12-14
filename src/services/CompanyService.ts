@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import { Types } from "mongoose";
 import { company } from "../interfaces/company.interface";
-import { unit } from "../interfaces/unit.interface";
+import { unit, updatedUnit } from "../interfaces/unit.interface";
 import { updatedUser } from "../interfaces/user.interface";
 import Company from "../models/Company";
 import UnitService from "./UnitService";
@@ -8,12 +8,12 @@ import UserService from "./UserService";
 
 export default {
   findAllCompanies: async () => {
-    const companies = await Company.find().populate("users");
+    const companies = await Company.find().populate("users").populate("units");
     return companies;
   },
 
-  findCompany: async (id: String) => {
-    const company = await Company.findOne({ _id: id }).populate("users");
+  findCompany: async (id: String | Types.ObjectId | undefined) => {
+    const company = await Company.findOne({ _id: id }).populate("users").populate("units");
     return company;
   },
 
@@ -36,12 +36,7 @@ export default {
     return company != null ? company : null;
   },
 
-  findCompanyByCompanyAndUnit: async (companyId: String, unitId: String) => {
-    let company = await Company.findOne({ _id: companyId, units: [{ _id: unitId }] });
-    return company != null ? company : null;
-  },
-
-  addUserInCompany: async (companyId: String, userId: String) => {
+  addUserInCompany: async (companyId: String | Types.ObjectId, userId: String | Types.ObjectId) => {
     const updatedCompany = await Company.updateOne(
       { _id: companyId },
       {
@@ -88,7 +83,12 @@ export default {
     );
   },
 
-  addUnitInCompany: async (companyId: String, unitId: String) => {
+  findCompanyByCompanyAndUnit: async (companyId: String, unitId: String) => {
+    let company = await Company.findOne({ _id: companyId, units: [{ _id: unitId }] });
+    return company != null ? company : null;
+  },
+
+  addUnitInCompany: async (companyId: String | Types.ObjectId, unitId: String | Types.ObjectId) => {
     const updatedCompany = await Company.updateOne(
       { _id: companyId },
       {
@@ -100,7 +100,7 @@ export default {
     return updatedCompany;
   },
 
-  moveUnitFromCompany: async (CurrentCompanyId: String, unitId: String, newUnitInfo: unit) => {
+  moveUnitFromCompany: async (CurrentCompanyId: String, unitId: String, newCompanyId: String) => {
     const updatedCompanyRemoved = await Company.updateOne(
       { _id: CurrentCompanyId },
       {
@@ -111,7 +111,7 @@ export default {
     );
 
     const updatedCompanyAdded = await Company.updateOne(
-      { _id: newUnitInfo.company },
+      { _id: newCompanyId },
       {
         $push: {
           units: [{ _id: unitId }],
@@ -119,7 +119,21 @@ export default {
       }
     );
 
-    let updatedUnit = UnitService.editUnit(unitId, newUnitInfo);
+    let updatedUnitCompany: updatedUnit = { company: newCompanyId };
+    let updatedUnit = UnitService.editUnit(unitId, updatedUnitCompany);
     return [updatedCompanyRemoved, updatedCompanyAdded, updatedUnit];
+  },
+
+  removeUnitFromCompany: async (unitId: String, companyId: String) => {
+    const updatedCompany = await Company.updateOne(
+      {
+        _id: companyId,
+      },
+      {
+        $pullAll: {
+          units: [{ _id: unitId }],
+        },
+      }
+    );
   },
 };
