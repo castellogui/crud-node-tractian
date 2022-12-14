@@ -12,6 +12,11 @@ export default {
     return user;
   },
 
+  findUserByEmail: async (email: String) => {
+    const user = await User.findOne({ email: email }).populate("company");
+    return user;
+  },
+
   createUser: async (newUserInfo: user) => {
     let newUser = await User.create(newUserInfo);
     return newUser;
