@@ -89,6 +89,25 @@ export const moveUserFromCompany = async (req: Request, res: Response) => {
   }
 };
 
+export const moveUnitFromCompany = async (req: Request, res: Response) => {
+  try {
+    let id = req.params.id;
+    let unitId = req.body.unitId;
+    let newUnitInfo = req.body.unitInfo;
+    await checkUnitInCompanyBeforeAdd(newUnitInfo.company, unitId);
+    let [updatedCompanyRemoved, updatedCompanyAdded, updatedUnit] =
+      await CompanyService.moveUnitFromCompany(id, unitId, newUnitInfo);
+    checkEntityNotFoundOrNotModified(await updatedUnit);
+    res.status(200).send({
+      message: "Unit transferred from company.",
+      updatedCompanyRemoved,
+      updatedCompanyAdded,
+    });
+  } catch (error) {
+    handleRequestError(error, res, "delete", "unit from company");
+  }
+};
+
 async function checkUsersBeforeDelete(id: String) {
   let resultQuery = await CompanyService.findCompany(id);
   let foundUsers = resultQuery?.users.length! > 0;
@@ -104,5 +123,15 @@ async function checkUserInCompanyBeforeAdd(newCompanyId: String, userId: String)
   const isUserInCompany = userFounded.length;
   if (isUserInCompany > 0) {
     throw Error("User is already added in company.");
+  }
+}
+
+async function checkUnitInCompanyBeforeAdd(newCompanyId: String, unitId: String) {
+  let unitFounded = [];
+  let response = await CompanyService.findCompanyByCompanyAndUnit(newCompanyId, unitId);
+  response != null ? unitFounded.push(response) : null;
+  const isUnitInCompany = unitFounded.length;
+  if (isUnitInCompany > 0) {
+    throw Error("Unit is already added in company.");
   }
 }

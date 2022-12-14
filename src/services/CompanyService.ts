@@ -1,6 +1,8 @@
 import { company } from "../interfaces/company.interface";
+import { unit } from "../interfaces/unit.interface";
 import { user } from "../interfaces/user.interface";
 import Company from "../models/Company";
+import UnitService from "./UnitService";
 import UserService from "./UserService";
 
 export default {
@@ -30,6 +32,11 @@ export default {
 
   findCompanyByCompanyAndUser: async (companyId: String, userId: String) => {
     let company = await Company.findOne({ _id: companyId, users: [{ _id: userId }] });
+    return company != null ? company : null;
+  },
+
+  findCompanyByCompanyAndUnit: async (companyId: String, unitId: String) => {
+    let company = await Company.findOne({ _id: companyId, units: [{ _id: unitId }] });
     return company != null ? company : null;
   },
 
@@ -66,5 +73,40 @@ export default {
 
     let updatedUser = UserService.editUser(userId, newUserInfo);
     return [updatedCompanyRemoved, updatedCompanyAdded, updatedUser];
+  },
+
+  addUnitInCompany: async (companyId: String, unitId: String) => {
+    const updatedCompany = await Company.updateOne(
+      { _id: companyId },
+      {
+        $push: {
+          units: [{ _id: unitId }],
+        },
+      }
+    );
+    return updatedCompany;
+  },
+
+  moveUnitFromCompany: async (CurrentCompanyId: String, unitId: String, newUnitInfo: unit) => {
+    const updatedCompanyRemoved = await Company.updateOne(
+      { _id: CurrentCompanyId },
+      {
+        $pullAll: {
+          units: [{ _id: unitId }],
+        },
+      }
+    );
+
+    const updatedCompanyAdded = await Company.updateOne(
+      { _id: newUnitInfo.company },
+      {
+        $push: {
+          units: [{ _id: unitId }],
+        },
+      }
+    );
+
+    let updatedUnit = UnitService.editUnit(unitId, newUnitInfo);
+    return [updatedCompanyRemoved, updatedCompanyAdded, updatedUnit];
   },
 };
