@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { company } from "../interfaces/company.interface";
 import CompanyService from "../services/CompanyService";
+import UserService from "../services/UserService";
 import { checkEntityNotFoundOrNotModified } from "../utils/entity";
 import handleRequestError from "../utils/error";
 
@@ -76,16 +77,18 @@ export const moveUserFromCompany = async (req: Request, res: Response) => {
     let userId = req.body.userId;
     let newCompanyId = req.body.newCompanyId;
     await checkUserInCompanyBeforeAdd(newCompanyId, userId);
+    checkEntityNotFoundOrNotModified(await UserService.findUser(userId));
+    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(currentCompanyId));
+    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(newCompanyId));
     let [updatedCompanyRemoved, updatedCompanyAdded, updatedUser] =
       await CompanyService.moveUserFromCompany(currentCompanyId, userId, newCompanyId);
-    checkEntityNotFoundOrNotModified(await updatedUser);
     res.status(200).send({
       message: "User transferred from company.",
       updatedCompanyRemoved,
       updatedCompanyAdded,
     });
   } catch (error) {
-    handleRequestError(error, res, "delete", "user from company");
+    handleRequestError(error, res, "move", "user from company");
   }
 };
 
