@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import handleRequestError from "../utils/error";
 import UserService from "../services/UserService";
-import { user } from "../interfaces/user.interface";
+import { updatedUser, user } from "../interfaces/user.interface";
 import { checkEntityNotFoundOrNotModified } from "../utils/entity";
 import CompanyService from "../services/CompanyService";
 const bcrypt = require("bcrypt");
@@ -56,7 +56,7 @@ export const createUser = async (req: Request, res: Response) => {
 export const editUser = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
-    const userInfo: user = {
+    const userInfo: updatedUser = {
       name: req.body.name,
       familyName: req.body.familyName,
       username: req.body.username,
@@ -81,7 +81,9 @@ export const deleteUser = async (req: Request, res: Response) => {
   try {
     let id = req.params.id;
     let requesterId = req.body.requesterId;
+    let companyId = req.body.companyId;
     await UserService.deleteUser(id, requesterId);
+    await CompanyService.removeUserFromCompany(id, companyId);
     res.status(200).send({ message: "User deleted." });
   } catch (error) {
     handleRequestError(error, res, "delete", "user");
