@@ -3,10 +3,11 @@ import mongoose, { Schema, SchemaTypes, Types } from "mongoose";
 const UnitSchema = new Schema({
   name: {
     type: SchemaTypes.String,
+    unique: true,
     required: [true, "name is required"],
   },
   zipCode: {
-    type: SchemaTypes.Number,
+    type: SchemaTypes.String,
     required: [true, "zipCode is required"],
   },
   created_at: {
