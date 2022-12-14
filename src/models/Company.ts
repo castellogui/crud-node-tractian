@@ -7,6 +7,7 @@ const CompanySchema = new Schema({
   },
   units: {
     type: SchemaTypes.Array,
+    ref: "Unit",
     required: [true, "units is required"],
     default: [],
   },
