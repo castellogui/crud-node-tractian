@@ -11,6 +11,7 @@ export interface user {
   lastLogin: Date;
   company: mongoose.Types.ObjectId;
   type: String;
+  token?: String;
 }
 
 export interface updatedUser {

@@ -9,7 +9,7 @@ import UserService from "../services/UserService";
 export const findAllAssets = async (req: Request, res: Response) => {
   try {
     let assets = await AssetService.findAllAssets();
-    res.status(200).send({ assets });
+    res.status(200).send(assets);
   } catch (error) {
     handleRequestError(error, res, "find", "assets");
   }

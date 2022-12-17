@@ -59,7 +59,7 @@ export default {
     );
 
     const updatedCompanyAdded = await Company.updateOne(
-      { _id: newCompanyId },
+      { name: newCompanyId },
       {
         $push: {
           users: [{ _id: userId }],

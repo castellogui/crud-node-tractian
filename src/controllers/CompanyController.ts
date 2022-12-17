@@ -9,7 +9,7 @@ import handleRequestError from "../utils/error";
 export const findAllCompanies = async (req: Request, res: Response) => {
   try {
     let companies = await CompanyService.findAllCompanies();
-    res.status(200).send({ companies });
+    res.status(200).send(companies);
   } catch (error) {
     handleRequestError(error, res, "find", "companies");
   }
@@ -123,21 +123,17 @@ async function checkUsersBeforeDelete(id: String) {
 }
 
 async function checkUserInCompanyBeforeAdd(newCompanyId: String, userId: String) {
-  let userFounded = [];
-  let response = await CompanyService.findCompanyByCompanyAndUser(newCompanyId, userId);
-  response != null ? userFounded.push(response) : null;
-  const isUserInCompany = userFounded.length;
-  if (isUserInCompany > 0) {
+  let response = await UserService.findUser(userId);
+  let checkCompanyId = response?.company == newCompanyId;
+  if (checkCompanyId) {
     throw Error("User is already added in company.");
   }
 }
 
 async function checkUnitInCompanyBeforeAdd(newCompanyId: String, unitId: String) {
-  let unitFounded = [];
-  let response = await CompanyService.findCompanyByCompanyAndUnit(newCompanyId, unitId);
-  response != null ? unitFounded.push(response) : null;
-  const isUnitInCompany = unitFounded.length;
-  if (isUnitInCompany > 0) {
+  let response = await UnitService.findUnit(unitId);
+  let checkCompanyId = response?.company == newCompanyId;
+  if (checkCompanyId) {
     throw Error("Unit is already added in company.");
   }
 }

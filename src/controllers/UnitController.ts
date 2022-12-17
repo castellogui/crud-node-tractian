@@ -10,7 +10,7 @@ const bcrypt = require("bcrypt");
 export const findAllUnits = async (req: Request, res: Response) => {
   try {
     let units = await UnitService.findAllUnits();
-    res.status(200).send({ units });
+    res.status(200).send(units);
   } catch (error) {
     handleRequestError(error, res, "find", "units");
   }
@@ -60,6 +60,9 @@ export const editUnit = async (req: Request, res: Response) => {
       assets: req.body.assets,
       company: req.body.companyId,
     };
+
+    console.log(unitInfo);
+    console.log(id);
 
     checkEntityNotFoundOrNotModified(await CompanyService.findCompany(unitInfo.company));
     let updatedUnit = await UnitService.editUnit(id, unitInfo);

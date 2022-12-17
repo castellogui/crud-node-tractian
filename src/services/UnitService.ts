@@ -10,7 +10,7 @@ export default {
   },
 
   findUnit: async (id: String | Types.ObjectId) => {
-    const unit = await Unit.findOne({ _id: id }).populate("company");
+    const unit = await Unit.findOne({ _id: id });
     return unit;
   },
 

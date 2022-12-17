@@ -8,7 +8,7 @@ export default {
   },
 
   findUser: async (id: String | Types.ObjectId | undefined) => {
-    const user = await User.findOne({ _id: id }).populate("company");
+    const user = await User.findOne({ _id: id });
     return user;
   },
 

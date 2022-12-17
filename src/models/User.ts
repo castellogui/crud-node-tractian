@@ -45,6 +45,9 @@ const UserSchema = new Schema({
     enum: ["ROLE_ADMIN", "ROLE_USER"],
     required: [true, "type is required"],
   },
+  token: {
+    type: String,
+  },
 });
 
 export default mongoose.model("User", UserSchema);

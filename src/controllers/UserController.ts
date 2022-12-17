@@ -9,7 +9,7 @@ const bcrypt = require("bcrypt");
 export const findAllUsers = async (req: Request, res: Response) => {
   try {
     let users = await UserService.findAllUsers();
-    res.status(200).send({ users });
+    res.status(200).send(users);
   } catch (error) {
     handleRequestError(error, res, "find", "users");
   }
