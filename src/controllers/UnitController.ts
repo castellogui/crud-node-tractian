@@ -61,9 +61,6 @@ export const editUnit = async (req: Request, res: Response) => {
       company: req.body.companyId,
     };
 
-    console.log(unitInfo);
-    console.log(id);
-
     checkEntityNotFoundOrNotModified(await CompanyService.findCompany(unitInfo.company));
     let updatedUnit = await UnitService.editUnit(id, unitInfo);
     checkEntityNotFoundOrNotModified(updatedUnit);
@@ -100,6 +97,9 @@ export const moveAssetFromUnit = async (req: Request, res: Response) => {
     let currentUnitId = req.params.id;
     let assetId = req.body.assetId;
     let newUnitId = req.body.newUnitId;
+    console.log(currentUnitId);
+    console.log(assetId);
+    console.log(newUnitId);
     checkEntityNotFoundOrNotModified(await AssetService.findAsset(assetId), assetId);
     checkEntityNotFoundOrNotModified(await UnitService.findUnit(currentUnitId));
     checkEntityNotFoundOrNotModified(await UnitService.findUnit(newUnitId));

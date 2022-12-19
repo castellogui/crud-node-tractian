@@ -7,7 +7,7 @@ mongoose
   .connect(`${process.env.MONGODB_URL}`)
   .then(() => {
     console.log("Connected with MongoDB");
-    app.listen(process.env.PORT);
+    app.listen(8080);
   })
   .catch((error) => {
     console.log(error);

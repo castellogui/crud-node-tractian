@@ -70,7 +70,7 @@ export const editUser = async (req: Request, res: Response) => {
       type: req.body.type,
     };
 
-    checkEntityNotFoundOrNotModified(await CompanyService.findCompany(userInfo.company));
+    // checkEntityNotFoundOrNotModified(await CompanyService.findCompany(userInfo.company));
     let updatedUser = await UserService.editUser(id, userInfo);
     checkEntityNotFoundOrNotModified(updatedUser);
     res.status(200).send({ message: "User updated.", updatedUser });

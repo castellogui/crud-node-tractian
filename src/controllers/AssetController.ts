@@ -36,7 +36,7 @@ export const createAsset = async (req: Request, res: Response) => {
       name: req.body.name,
       unit: req.body.unit,
       description: req.body.description,
-      image: req.body.image,
+      avatar: req.body.avatar,
       model: req.body.model,
       owner: req.body.owner,
       status: req.body.status,
@@ -60,7 +60,7 @@ export const editAsset = async (req: Request, res: Response) => {
       name: req.body.name,
       unit: req.body.unit,
       description: req.body.description,
-      image: req.body.image,
+      avatar: req.body.avatar,
       model: req.body.model,
       owner: req.body.owner,
       status: req.body.status,
@@ -69,7 +69,8 @@ export const editAsset = async (req: Request, res: Response) => {
     };
 
     checkEntityNotFoundOrNotModified(await UnitService.findUnit(assetInfo.unit));
-    checkEntityNotFoundOrNotModified(await UserService.findUser(assetInfo.owner));
+    console.log(await UnitService.findUnit(assetInfo.unit));
+    // checkEntityNotFoundOrNotModified(await UserService.findUser(assetInfo.owner));
     let updatedAsset = await AssetService.editAsset(id, assetInfo);
     checkEntityNotFoundOrNotModified(updatedAsset);
     res.status(200).send({ message: "Asset updated.", updatedAsset });
